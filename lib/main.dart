@@ -1,3 +1,6 @@
+
+import 'package:calculator/Operand.dart';
+import 'package:calculator/Operator.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -31,6 +34,48 @@ class CalculatorHome extends StatefulWidget {
 class _CalculatorHomeState extends State<CalculatorHome> {
   String _output = "0";
 
+  Operand firstOperand = Operand();
+  Operand? secondOperand;
+  late Operand currentOperand = firstOperand;
+  Operator? operator;
+
+  void update() {
+    setState(() {
+      _output = currentOperand.toString();
+    });
+  }
+
+  void clear() {
+    firstOperand = Operand();
+    secondOperand = null;
+    currentOperand = firstOperand;
+    operator = null;
+    update();
+  }
+
+  void equal() {
+    firstOperand.operation(operator!, secondOperand!);
+    secondOperand = null;
+    operator = null;
+    currentOperand = firstOperand;
+    update();
+  }
+
+  void onDigitClick(int digit) {
+    currentOperand.addDigit(digit);
+    update();
+  }
+
+  void onOperatorClick(Operator operator) {
+    if (this.operator != null) {
+      equal();
+    }
+    this.operator = operator;
+    secondOperand = Operand();
+    currentOperand = secondOperand!;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,41 +108,79 @@ class _CalculatorHomeState extends State<CalculatorHome> {
                     children: [
                       Row (
                         children: [
-                          Button(text: "C", onPressed: () {}, color: Color(0xFF626B7C)),
-                          Button(text: "+/-", onPressed: () {}, color: Color(0xFF626B7C)),
+                          Button(text: "C", onPressed: () {
+                            clear();
+                          }, color: Color(0xFF626B7C)),
+                          Button(text: "+/-", onPressed: () {
+                            currentOperand.changeSign();
+                            update();
+                          }, color: Color(0xFF626B7C)),
                           Button(text: "%", onPressed: () {}, color: Color(0xFF626B7C)),
-                          Button(text: "÷", onPressed: () {}, color: Color(0xFFE28D21)),
+                          Button(text: "÷", onPressed: () {
+                            onOperatorClick(Operator.divide);
+                          }, color: Color(0xFFE28D21)),
                         ],
                       ),
                       Row (
                         children: [
-                          Button(text: "7", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "8", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "9", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "×", onPressed: () {}, color: Color(0xFFE28D21)),
+                          Button(text: "7", onPressed: () {
+                            onDigitClick(7);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "8", onPressed: () {
+                            onDigitClick(8);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "9", onPressed: () {
+                            onDigitClick(9);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "×", onPressed: () {
+                            onOperatorClick(Operator.multiply);
+                          }, color: Color(0xFFE28D21)),
                         ],
                       ),
                       Row (
                         children: [
-                          Button(text: "4", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "5", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "6", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "-", onPressed: () {}, color: Color(0xFFE28D21)),
+                          Button(text: "4", onPressed: () {
+                            onDigitClick(4);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "5", onPressed: () {
+                            onDigitClick(5);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "6", onPressed: () {
+                            onDigitClick(6);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "-", onPressed: () {
+                            onOperatorClick(Operator.subtract);
+                          }, color: Color(0xFFE28D21)),
                         ],
                       ),
                       Row (
                         children: [
-                          Button(text: "1", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "2", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "3", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "+", onPressed: () {}, color: Color(0xFFE28D21)),
+                          Button(text: "1", onPressed: () {
+                            onDigitClick(1);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "2", onPressed: () {
+                            onDigitClick(2);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "3", onPressed: () {
+                            onDigitClick(3);
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "+", onPressed: () {
+                            onOperatorClick(Operator.add);
+                          }, color: Color(0xFFE28D21)),
                         ],
                       ),
                       Row (
                         children: [
-                          Button(text: "0", onPressed: () {}, color: Color(0xFF393E51), flex: 2,),
-                          Button(text: ".", onPressed: () {}, color: Color(0xFF393E51)),
-                          Button(text: "=", onPressed: () {}, color: Color(0xFFE28D21)),
+                          Button(text: "0", onPressed: () {
+                            onDigitClick(0);
+                          }, color: Color(0xFF393E51), flex: 2,),
+                          Button(text: ".", onPressed: () {
+                            currentOperand.addComma();
+                            update();
+                          }, color: Color(0xFF393E51)),
+                          Button(text: "=", onPressed: () {
+                            equal();
+                          }, color: Color(0xFFE28D21)),
                         ],
                       )
                     ],
@@ -111,6 +194,7 @@ class _CalculatorHomeState extends State<CalculatorHome> {
     );
   }
 }
+
 
 class Button extends StatelessWidget {
   final String text;
@@ -136,13 +220,6 @@ class Button extends StatelessWidget {
             padding: const EdgeInsets.all(4.0),
             child: ElevatedButton(
                 onPressed: onPressed,
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: fontSize
-                  )
-                ),
                 style: ElevatedButton.styleFrom(
                 backgroundColor: color,
               padding: EdgeInsets.symmetric(vertical: 24),
@@ -150,6 +227,13 @@ class Button extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18)
               )
             ),
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: fontSize
+                  )
+                ),
             ),
         )
     );
